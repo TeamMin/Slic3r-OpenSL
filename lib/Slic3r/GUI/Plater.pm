@@ -220,10 +220,11 @@ sub new {
                 print       => 'Print settings',
                 filament    => 'Filament',
                 printer     => 'Printer',
+		        opensl      => 'OpenSL'
             );
             $self->{preset_choosers} = {};
             $self->{preset_choosers_sizers} = {};
-            for my $group (qw(print filament printer)) {
+            for my $group (qw(print filament printer opensl)) {
                 my $text = Wx::StaticText->new($self, -1, "$group_labels{$group}:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
                 my $choice = Wx::Choice->new($self, -1, wxDefaultPosition, [150, -1], []);
                 $self->{preset_choosers}{$group} = [$choice];

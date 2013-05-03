@@ -1021,6 +1021,60 @@ END
         type    => 'f',
         default => 20,
     },
+
+    #OPEN SL Options
+    'opensl_mode' => {
+        label   => 'OpenSL Mode',
+        tooltip => 'Enable OpenSL Output',
+        cli     => 'opensl!',
+        type    => 'bool',
+        default => 1,
+    },
+
+    'opensl_peel_distance' => {
+        label   => 'OpenSL Peel Distance',
+        tooltip => 'Distance for the Z1 & Z2 Axis peel move.',
+        sidetext => 'mm',
+        cli     => 'opensl-peel-distance=f',
+        type    => 'f',
+        default => 5,
+    },
+    
+    'opensl_peel_speed' => {
+        label   => 'OpenSL Peel Speed',
+        tooltip => 'Speed for the Z1 & Z2 Axis peel move.',
+        sidetext => 'Step/s',
+        cli     => 'opensl-peel-speed=f',
+        type    => 'f',
+        default => 200,
+    },
+
+    'opensl_peel_wait' => {
+        label   => 'OpenSL Peel Wait',
+        tooltip => 'Time to wait after each peel move (per axis)',
+        sidetext => 'ms',
+        cli     => 'opensl-peel-wait=f',
+        type    => 'f',
+        default => 250,
+    },
+    
+    'opensl_layer_wait' => {
+        label   => 'OpenSL Layer Wait',
+        tooltip => 'Time to wait after each complete peel move.',
+        sidetext => 'ms',
+        cli     => 'opensl-layer-wait=f',
+        type    => 'f',
+        default => 500,
+    },
+    
+    'opensl_laser_power' => {
+        label   => 'OpenSL Laser Power',
+        tooltip => 'Laser Power (0-255) (O::OFF - 255::100% Power',
+        sidetext => '(0-255)',
+        cli     => 'opensl-laser_power=f',
+        type    => 'f',
+        default => 255,
+    }
 };
 
 # generate accessors

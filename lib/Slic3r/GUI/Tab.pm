@@ -792,6 +792,48 @@ sub load_config_file {
         if @{ $self->{config}->nozzle_diameter } > 1;
 }
 
+package Slic3r::GUI::Tab::Opensl;
+use base 'Slic3r::GUI::Tab';
+
+sub name { 'opensl' }
+sub title { 'OpenSL Settings' }
+
+sub build {
+    my $self = shift;
+    
+    $self->add_options_page('OpenSL', 'funnel.png', optgroups => [
+        {
+           title => 'OpenSL Mode',
+           options => [qw(opensl_mode)],
+        },
+        {
+             title => 'Peel Settings',
+             options => [qw(opensl_peel_distance opensl_peel_speed opensl_peel_wait opensl_layer_wait)],
+        },
+        {
+             title => 'Laser Settings',
+             options => [qw(opensl_laser_power)],
+        },
+    ]);
+}
+
+sub _update_description {
+    my $self = shift;
+    
+    my $config = $self->config;
+    
+    my $msg = "";
+    
+}
+
+sub on_value_change {
+    my $self = shift;
+    my ($opt_key) = @_;
+    $self->SUPER::on_value_change(@_);
+    
+    $self->_update_description;
+}
+
 package Slic3r::GUI::Tab::Page;
 use Wx qw(:misc :panel :sizer);
 use base 'Wx::ScrolledWindow';

@@ -216,4 +216,29 @@ sub build {
     );
 }
 
+package Slic3r::GUI::SimpleTab::Opensl;
+use base 'Slic3r::GUI::SimpleTab';
+
+sub name { 'opensl' }
+sub title { 'OpenSL Settings' }
+
+sub build {
+    my $self = shift;
+    
+    $self->append_optgroup(
+        title => 'OpenSL Mode',
+        options => [qw(opensl_mode)],
+    );
+    
+    $self->append_optgroup(
+        title => 'Peel Settings',
+        options => [qw(opensl_peel_distance opensl_peel_speed opensl_peel_wait opensl_layer_wait)],
+    );
+   
+    $self->append_optgroup(
+        title => 'Laser Settings',
+        options => [qw(opensl_laser_power)],
+    );
+    
+}
 1;

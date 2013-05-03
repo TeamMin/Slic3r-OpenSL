@@ -44,7 +44,7 @@ sub new {
     
     my $class_prefix = $self->{mode} eq 'simple' ? "Slic3r::GUI::SimpleTab::" : "Slic3r::GUI::Tab::";
     my $init = 0;
-    for my $tab_name (qw(print filament printer)) {
+    for my $tab_name (qw(print opensl printer filament)) {
         my $tab = $self->{options_tabs}{$tab_name} = ($class_prefix . ucfirst $tab_name)->new(
             $self->{tabpanel},
             on_value_change     => sub {
@@ -195,7 +195,7 @@ sub init_print {
     my %extra_variables = ();
     if ($self->{mode} eq 'expert') {
         $extra_variables{"${_}_preset"} = $self->{options_tabs}{$_}->current_preset->{name}
-            for qw(print filament printer);
+            for qw(print opensl filament printer);
     }
     
     return Slic3r::Print->new(
@@ -354,6 +354,7 @@ sub config {
         Slic3r::Config->new_from_defaults,
         $self->{options_tabs}{print}->config,
         $self->{options_tabs}{printer}->config,
+	$self->{options_tabs}{opensl}->config,
         $filament_config,
     );
     

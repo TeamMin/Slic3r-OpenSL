@@ -34,6 +34,7 @@ use constant MI_TAB_PLATER    => &Wx::NewId;
 use constant MI_TAB_PRINT     => &Wx::NewId;
 use constant MI_TAB_FILAMENT  => &Wx::NewId;
 use constant MI_TAB_PRINTER   => &Wx::NewId;
+use constant MI_TAB_OPENSL   => &Wx::NewId;
 
 use constant MI_CONF_WIZARD   => &Wx::NewId;
 use constant MI_WEBSITE       => &Wx::NewId;
@@ -69,7 +70,7 @@ sub OnInit {
     Slic3r::debugf "Data directory: %s\n", $datadir;
     my $encoded_datadir = Slic3r::encode_path($datadir);
     my $run_wizard = (-d $encoded_datadir) ? 0 : 1;
-    for ($encoded_datadir, "$encoded_datadir/print", "$encoded_datadir/filament", "$encoded_datadir/printer") {
+    for ($encoded_datadir, "$encoded_datadir/print", "$encoded_datadir/filament", "$encoded_datadir/printer", "$encoded_datadir/opensl") {
         mkdir or $self->fatal_error("Slic3r was unable to create its data directory at $_ (errno: $!).")
             unless -d $_;
     }
@@ -145,10 +146,12 @@ sub OnInit {
         $windowMenu->Append(MI_TAB_PRINT, "Select P&rint Settings Tab\tCtrl+2", 'Show the print settings');
         $windowMenu->Append(MI_TAB_FILAMENT, "Select &Filament Settings Tab\tCtrl+3", 'Show the filament settings');
         $windowMenu->Append(MI_TAB_PRINTER, "Select Print&er Settings Tab\tCtrl+4", 'Show the printer settings');
+        $windowMenu->Append(MI_TAB_OPENSL, "Select Open&SL Settings Tab\tCtrl+5", 'Show the OpenSL settings');
         EVT_MENU($frame, MI_TAB_PLATER, sub { $self->{skeinpanel}->select_tab(0) });
         EVT_MENU($frame, MI_TAB_PRINT, sub { $self->{skeinpanel}->select_tab(1) });
         EVT_MENU($frame, MI_TAB_FILAMENT, sub { $self->{skeinpanel}->select_tab(2) });
         EVT_MENU($frame, MI_TAB_PRINTER, sub { $self->{skeinpanel}->select_tab(3) });
+        EVT_MENU($frame, MI_TAB_OPENSL, sub { $self->{skeinpanel}->select_tab(4) });
     }
     
     # Help menu

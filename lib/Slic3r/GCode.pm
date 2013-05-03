@@ -236,6 +236,15 @@ sub extrude_path {
     
     # extrude arc or line
     my $path_length = 0;
+
+    #OpenSL -- Turn on the Laser
+    if($Slic3r::Config->opensl_mode)
+    {
+       my $opensl_laser_power = $Slic3r::Config->opensl_laser_power;
+       $gcode .= "M600 S$opensl_laser_power\n";  #Laser On
+       $gcode .= "M400\n";       #Sync
+    }
+
     if ($path->isa('Slic3r::ExtrusionPath::Arc')) {
         $path_length = unscale $path->length;
         $gcode .= $self->G2_G3($path->points->[-1], $path->orientation, 
@@ -245,7 +254,17 @@ sub extrude_path {
         foreach my $line ($path->lines) {
             my $line_length = unscale $line->length;
             $path_length += $line_length;
-            $gcode .= $self->G1($line->[B], undef, $e * $line_length, $description);
+
+	    #OpenSL -- Don't Extrude
+            if($Slic3r::Config->opensl_mode)
+            {
+                 $gcode .= $self->G1($line->[B], undef, undef, $description); 
+	    }
+            else
+            {
+                 $gcode .= $self->G1($line->[B], undef, $e * $line_length, $description);
+            }
+
         }
         $self->wipe_path(Slic3r::Polyline->new([ reverse @{$path->points} ]))
             if $self->extruder->wipe;
@@ -261,6 +280,13 @@ sub extrude_path {
         $self->elapsed_time($self->elapsed_time + $path_time);
     }
     
+    #OpenSL -- Turn off the Laser
+    if($Slic3r::Config->opensl_mode)
+    {
+       $gcode .= "M601\n";  #Laser Off
+       $gcode .= "M400\n";  #Sync
+    }
+
     # reset acceleration
     $gcode .= $self->set_acceleration($Slic3r::Config->default_acceleration)
         if $acceleration && $Slic3r::Config->default_acceleration;
@@ -384,7 +410,9 @@ sub retract {
         # combine Z change and retraction
         $self->speed('travel');
         my $travel = [undef, $params{move_z}, $retract->[2], "change layer and $comment"];
-        $gcode .= $self->G0(@$travel);
+
+	$gcode .= $self->G0(@$travel);
+
     } else {
         # check that we have a positive wipe length
         if ($wipe_path && (my $total_wipe_length = $wipe_path->length)) {
@@ -406,7 +434,10 @@ sub retract {
                 $gcode .= $self->G0(@$travel);
                 $self->lifted($self->extruder->retract_lift);
             } elsif ($lift) {
-                $gcode .= $self->G1(@$lift);
+               if(!$Slic3r::Config->opensl_mode)
+               {
+	          $gcode .= $self->G1(@$lift);;
+	       }
             }
         }
     }
@@ -475,7 +506,7 @@ sub _G0_G1 {
     my $self = shift;
     my ($gcode, $point, $z, $e, $comment) = @_;
     my $dec = $self->dec;
-    
+     
     if ($point) {
         $gcode .= sprintf " X%.${dec}f Y%.${dec}f", 
             ($point->x * &Slic3r::SCALING_FACTOR) + $self->shift_x - $self->extruder->extruder_offset->[X], 
@@ -485,7 +516,41 @@ sub _G0_G1 {
     }
     if (defined $z && (!defined $self->z || $z != $self->z)) {
         $self->z($z);
-        $gcode .= sprintf " Z%.${dec}f", $z;
+	if($point)
+	{
+           $gcode .= sprintf " Z%.${dec}f", $z;
+	}
+	else
+	{
+           if($Slic3r::Config->opensl_mode)
+           {
+	      $gcode = ""; 
+              if($self->layer->id > 0)
+	      {
+  	         #Open SL Peel!
+  	         my $opensl_peel_dist = $Slic3r::Config->opensl_peel_distance;
+  	         my $opensl_peel_speed = $Slic3r::Config->opensl_peel_speed;
+	         my $opensl_peel_wait = $Slic3r::Config->opensl_peel_wait;
+	         my $opensl_layer_wait = $Slic3r::Config->opensl_layer_wait;
+	         my $opensl_laser_power = $Slic3r::Config->opensl_laser_power;
+	         my $opensl_layer_height = $Slic3r::Config->layer_height;
+	         $gcode = "G91\n";
+	         $gcode .= "G1 E$opensl_peel_dist F$opensl_peel_speed\n";
+	         $gcode .= "G4 P$opensl_peel_wait\n";
+	         $gcode .= "G1 Z$opensl_peel_dist F$opensl_peel_speed\n";
+	         $gcode .= "G4 P$opensl_peel_wait\n";
+	         my $layer_step = $opensl_peel_dist - $opensl_layer_height;
+	         $gcode .= "G1 Z-$layer_step E-$layer_step F$opensl_peel_speed\n";
+	         $gcode .= "G4 P$opensl_layer_wait\n";
+	         $gcode .= "G90\n";
+              }
+	      return $gcode;
+           }
+	   else
+	   {
+              $gcode .= sprintf " Z%.${dec}f", $z;
+	   }
+	}
     }
     
     return $self->_Gx($gcode, $e, $comment);
