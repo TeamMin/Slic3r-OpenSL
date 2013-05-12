@@ -535,12 +535,12 @@ sub _G0_G1 {
 	         my $opensl_laser_power = $Slic3r::Config->opensl_laser_power;
 	         my $opensl_layer_height = $Slic3r::Config->layer_height;
 	         $gcode = "G91\n";
-	         $gcode .= "G1 E$opensl_peel_dist F$opensl_peel_speed\n";
+	         $gcode .= "G1 L$opensl_peel_dist F$opensl_peel_speed\n";
 	         $gcode .= "G4 P$opensl_peel_wait\n";
-	         $gcode .= "G1 Z$opensl_peel_dist F$opensl_peel_speed\n";
+	         $gcode .= "G1 R$opensl_peel_dist F$opensl_peel_speed\n";
 	         $gcode .= "G4 P$opensl_peel_wait\n";
 	         my $layer_step = $opensl_peel_dist - $opensl_layer_height;
-	         $gcode .= "G1 Z-$layer_step E-$layer_step F$opensl_peel_speed\n";
+	         $gcode .= "G1 Z-$layer_step F$opensl_peel_speed\n";
 	         $gcode .= "G4 P$opensl_layer_wait\n";
 	         $gcode .= "G90\n";
               }
