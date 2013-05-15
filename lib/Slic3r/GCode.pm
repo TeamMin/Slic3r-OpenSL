@@ -514,44 +514,44 @@ sub _G0_G1 {
         $gcode = $self->_limit_frequency($point) . $gcode;
         $self->last_pos($point->clone);
     }
-    if (defined $z && (!defined $self->z || $z != $self->z)) {
+    if (defined $z && (!defined $self->z || $z != $self->z)) 
+	{
         $self->z($z);
-	if($point)
-	{
-           $gcode .= sprintf " Z%.${dec}f", $z;
-	}
-	else
-	{
-           if($Slic3r::Config->opensl_mode)
-           {
-	      $gcode = ""; 
-              if($self->layer->id > 0)
-	      {
-  	         #Open SL Peel!
-  	         my $opensl_peel_dist = $Slic3r::Config->opensl_peel_distance;
-  	         my $opensl_peel_speed = $Slic3r::Config->opensl_peel_speed;
-	         my $opensl_peel_wait = $Slic3r::Config->opensl_peel_wait;
-	         my $opensl_layer_wait = $Slic3r::Config->opensl_layer_wait;
-	         my $opensl_laser_power = $Slic3r::Config->opensl_laser_power;
-	         my $opensl_layer_height = $Slic3r::Config->layer_height;
-	         $gcode = "G91\n";
-	         $gcode .= "G1 L$opensl_peel_dist F$opensl_peel_speed\n";
-	         $gcode .= "G4 P$opensl_peel_wait\n";
-	         $gcode .= "G1 R$opensl_peel_dist F$opensl_peel_speed\n";
-	         $gcode .= "G4 P$opensl_peel_wait\n";
-	         my $layer_step = $opensl_peel_dist - $opensl_layer_height;
-	         $gcode .= "G1 Z-$layer_step F$opensl_peel_speed\n";
-	         $gcode .= "G4 P$opensl_layer_wait\n";
-	         $gcode .= "G90\n";
-              }
-	      return $gcode;
-           }
-	   else
-	   {
-              $gcode .= sprintf " Z%.${dec}f", $z;
-	   }
-	}
-    }
+		if($point)
+		{
+			   $gcode .= sprintf " Z%.${dec}f", $z;
+		}
+		else
+		{
+			if($Slic3r::Config->opensl_mode)
+			{
+				$gcode = ""; 
+				if($self->layer->id > 0)
+				{
+					 #Open SL Peel!
+					 my $opensl_peel_dist = $Slic3r::Config->opensl_peel_distance;
+					 my $opensl_peel_speed = $Slic3r::Config->opensl_peel_speed;
+					 my $opensl_peel_wait = $Slic3r::Config->opensl_peel_wait;
+					 my $opensl_layer_wait = $Slic3r::Config->opensl_layer_wait;
+					 my $opensl_laser_power = $Slic3r::Config->opensl_laser_power;
+					 
+					 my $peel_dist = $z + $opensl_peel_dist;
+					 $gcode .= "G1 L$peel_dist F$opensl_peel_speed\n";
+					 $gcode .= "G4 P$opensl_peel_wait\n";
+					 $gcode .= "G1 R$peel_dist F$opensl_peel_speed\n";
+					 $gcode .= "G4 P$opensl_peel_wait\n";
+					 
+					 $gcode .= "G1 Z$z F$opensl_peel_speed\n";
+					 $gcode .= "G4 P$opensl_layer_wait\n";
+				}
+				return $gcode;
+			}
+			else
+			{
+				$gcode .= sprintf " Z%.${dec}f", $z;
+			}
+		}
+   }
     
     return $self->_Gx($gcode, $e, $comment);
 }
